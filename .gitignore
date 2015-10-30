@@ -3,3 +3,6 @@ out/
 .idea/copyright/
 .idea/uiDesigner.xml
 .idea/workspace.xml
+gen/
+src/main/java/ru/spbau/kozlov/llang/grammar/*.tokens
+src/main/java/ru/spbau/kozlov/llang/grammar/*.java

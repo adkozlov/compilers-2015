@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="ANTLR4" type="repository">
+    <properties maven-id="org.antlr:antlr4:4.5.1-1" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/antlr4-4.5.1-1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
