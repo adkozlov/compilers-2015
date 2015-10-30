@@ -6,6 +6,7 @@ import org.antlr.v4.runtime._
 import org.antlr.v4.runtime.tree.ParseTreeWalker
 import ru.spbau.kozlov.llang.compiler.environment._
 import ru.spbau.kozlov.llang.compiler.parser._
+import ru.spbau.kozlov.llang.compiler.semantics.{SemanticsPhaseFailedResult, SemanticsPhaseListener, SemanticsPhaseSucceededResult}
 import ru.spbau.kozlov.llang.grammar.LLangParser.ProgramContext
 import ru.spbau.kozlov.llang.grammar.{LLangLexer, LLangListener, LLangParser}
 
@@ -47,6 +48,10 @@ case object Compiler {
             case EnvironmentPhaseSucceededResult(firstEnvironmentContext) =>
               environmentSecondPhase(firstEnvironmentContext) match {
                 case EnvironmentPhaseSucceededResult(secondTopLevelEnvironment) =>
+                  semanticsPhase(secondTopLevelEnvironment) match {
+                    case SemanticsPhaseSucceededResult(semanticsContext) =>
+                    case SemanticsPhaseFailedResult(semanticsErrors) => printCompilationErrors(semanticsErrors)
+                  }
                 case EnvironmentPhaseFailedResult(environmentErrors) => printCompilationErrors(environmentErrors)
               }
             case EnvironmentPhaseFailedResult(environmentErrors) => printCompilationErrors(environmentErrors)
@@ -79,6 +84,12 @@ case object Compiler {
     val environmentSecondPhaseListener = EnvironmentSecondPhaseListener()
     walkParseTree(environmentSecondPhaseListener, programContext)
     environmentSecondPhaseListener.result(programContext)
+  }
+
+  private def semanticsPhase(programContext: ProgramContext) = {
+    val semanticsPhaseListener = SemanticsPhaseListener()
+    walkParseTree(semanticsPhaseListener, programContext)
+    semanticsPhaseListener.result(programContext)
   }
 }
 
