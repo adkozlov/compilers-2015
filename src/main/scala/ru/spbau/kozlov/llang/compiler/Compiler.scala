@@ -1,10 +1,11 @@
 package ru.spbau.kozlov.llang.compiler
 
-import java.io.IOException
+import java.io.{File, IOException}
 
 import org.antlr.v4.runtime._
 import org.antlr.v4.runtime.tree.ParseTreeWalker
 import ru.spbau.kozlov.llang.compiler.environment._
+import ru.spbau.kozlov.llang.compiler.generator.{GeneratorPhaseFailedResult, GeneratorPhaseListener, GeneratorPhaseSucceededResult}
 import ru.spbau.kozlov.llang.compiler.parser._
 import ru.spbau.kozlov.llang.compiler.semantics.{SemanticsPhaseFailedResult, SemanticsPhaseListener, SemanticsPhaseSucceededResult}
 import ru.spbau.kozlov.llang.grammar.LLangParser.ProgramContext
@@ -50,6 +51,10 @@ case object Compiler {
                 case EnvironmentPhaseSucceededResult(secondTopLevelEnvironment) =>
                   semanticsPhase(secondTopLevelEnvironment) match {
                     case SemanticsPhaseSucceededResult(semanticsContext) =>
+                      generatorPhase(semanticsContext, ".") match {
+                        case GeneratorPhaseSucceededResult(_) =>
+                        case GeneratorPhaseFailedResult(generatorErrors) => printCompilationErrors(generatorErrors)
+                      }
                     case SemanticsPhaseFailedResult(semanticsErrors) => printCompilationErrors(semanticsErrors)
                   }
                 case EnvironmentPhaseFailedResult(environmentErrors) => printCompilationErrors(environmentErrors)
@@ -90,6 +95,12 @@ case object Compiler {
     val semanticsPhaseListener = SemanticsPhaseListener()
     walkParseTree(semanticsPhaseListener, programContext)
     semanticsPhaseListener.result(programContext)
+  }
+
+  private def generatorPhase(programContext: ProgramContext, outputPath: String) = {
+    val generatorPhaseListener = new GeneratorPhaseListener(new File(outputPath))
+    walkParseTree(generatorPhaseListener, programContext)
+    generatorPhaseListener.result(programContext)
   }
 }
 
